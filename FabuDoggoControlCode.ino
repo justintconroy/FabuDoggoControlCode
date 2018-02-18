@@ -16,7 +16,7 @@ XBOXUSB Xbox(&Usb);
 
 int mouthPin = 4;
 int mouthOpen = 36;
-int mouthNeutral = 90;
+int mouthNeutral = 85;
 int mouthClosed = 100;
 Servo mouthServo;
 
@@ -46,8 +46,17 @@ enum motor
   blue,
 };
 
+enum MouthState
+{
+  alwaysOpen,
+  alwaysClosed,
+  alwaysNeutral,
+  userControl
+};
+
 void driveMotor(motor motor, int speed);
 void driveMotor(int motorForwardPin, int motorReversePin, int speed);
+void controlMouth(MouthState mouthState, int userPosition);
 
 void setup()
 {
@@ -94,6 +103,8 @@ void setup()
   pinMode(blueReverse, OUTPUT);
 }
 
+MouthState mouthButtonState = userControl;
+
 void loop()
 {
   Usb.Task();
@@ -109,7 +120,7 @@ void loop()
     Serial.print("Right Hat Y: ");
     Serial.println(rightHatY);
 #endif
-    
+
     if (leftHatY > 7500 || leftHatY < -7500)
     {
       int y = map(leftHatY, INT_MIN, INT_MAX, -255, 255);
@@ -134,11 +145,22 @@ void loop()
       driveMotor(blue, 0);
     }
 
+    if (Xbox.getButtonClick(A))
+    {
+      mouthButtonState = alwaysNeutral;
+      Xbox.setLedBlink(ALL);
+    }
+    if (Xbox.getButtonClick(B))
+    {
+      mouthButtonState = userControl;
+      Xbox.setLedOn(LED1);
+    }
+
     int r2 = Xbox.getButtonPress(R2);
     if (r2)
     {
       int mouthPos = map(r2, 0, 255, mouthClosed, mouthOpen);
-      mouthServo.write(mouthPos);
+      controlMouth(mouthButtonState, mouthPos);
 
 #ifdef FABU_DEBUG
       Serial.print("R2: ");
@@ -152,7 +174,7 @@ void loop()
 #ifdef FABU_DEBUG
       Serial.println("Mouth closed.");
 #endif
-      mouthServo.write(mouthClosed);
+      controlMouth(mouthButtonState, mouthClosed);
     }
   }
 
@@ -225,6 +247,28 @@ void driveMotor(int motorForwardPin, int motorReversePin,int speed)
   {
     digitalWrite(motorForwardPin, LOW);
     digitalWrite(motorReversePin, LOW);
+  }
+}
+
+void controlMouth(MouthState mouthState, int userPosition)
+{
+  switch (mouthState)
+  {
+    case alwaysOpen:
+      mouthServo.write(mouthOpen);
+      break;
+    case alwaysClosed:
+      mouthServo.write(mouthClosed);
+      break;
+    case alwaysNeutral:
+      mouthServo.write(mouthNeutral);
+      break;
+    case userControl:
+      mouthServo.write(userPosition);
+      break;
+    default:
+      mouthServo.write(mouthClosed);
+      break;
   }
 }
 
