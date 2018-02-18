@@ -9,7 +9,7 @@
 #endif
 #include <SPI.h>
 
-//#define ENABLE_UHS_DEBUGGING 1
+//#define FABU_DEBUG
 
 USB Usb;
 XBOXUSB Xbox(&Usb);
@@ -103,10 +103,12 @@ void loop()
     int leftHatY = Xbox.getAnalogHat(LeftHatY);
     int rightHatY = Xbox.getAnalogHat(RightHatY);
 
+#ifdef FABU_DEBUG
     Serial.print("Left Hat Y: ");
     Serial.println(leftHatY);
     Serial.print("Right Hat Y: ");
     Serial.println(rightHatY);
+#endif
     
     if (leftHatY > 7500 || leftHatY < -7500)
     {
@@ -165,23 +167,31 @@ void driveMotor(motor motor, int speed)
   switch (motor)
   {
     case white:
+#ifdef FABU_DEBUG
       Serial.print("Driving white motor. Speed: ");
       Serial.println(speed);
+#endif
       driveMotor(whiteForward, whiteReverse, speed);
       break;
     case yellow:
+#ifdef FABU_DEBUG
       Serial.print("Driving yellow motor. Speed: ");
       Serial.println(speed);
+#endif
       driveMotor(yellowForward, yellowReverse, speed);
       break;
     case orange:
+#ifdef FABU_DEBUG
       Serial.print("Driving orange motor. Speed: ");
       Serial.println(speed);
+#endif
       driveMotor(orangeForward, orangeReverse, speed);
       break;
     case blue:
+#ifdef FABU_DEBUG
       Serial.print("Driving blue motor. Speed: ");
       Serial.println(speed);
+#endif
       driveMotor(blueForward, blueReverse, speed);
       break;
     default:
