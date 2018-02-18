@@ -17,7 +17,7 @@ XBOXUSB Xbox(&Usb);
 int mouthPin = 4;
 int mouthOpen = 36;
 int mouthNeutral = 90;
-int mouthClosed = 103;
+int mouthClosed = 100;
 Servo mouthServo;
 
 // White motor is front left.
@@ -133,28 +133,28 @@ void loop()
       driveMotor(orange, 0);
       driveMotor(blue, 0);
     }
+
+    int r2 = Xbox.getButtonPress(R2);
+    if (r2)
+    {
+      int mouthPos = map(r2, 0, 255, mouthClosed, mouthOpen);
+      mouthServo.write(mouthPos);
+
+#ifdef FABU_DEBUG
+      Serial.print("R2: ");
+      Serial.print(r2);
+      Serial.print("\tMouth Position: ");
+      Serial.println(mouthPos);
+#endif
+    }
+    else
+    {
+#ifdef FABU_DEBUG
+      Serial.println("Mouth closed.");
+#endif
+      mouthServo.write(mouthClosed);
+    }
   }
-//  if (Serial.available() > 0)
-//  {
-//    serialRead = Serial.read();
-//
-//    Serial.println("Recieved " + serialRead);
-//
-//    switch(serialRead)
-//    {
-//      case '1':
-//        mouthServo.write(mouthOpen);
-//        break;
-//      case '2':
-//        mouthServo.write(mouthNeutral);
-//        break;
-//      case '3':
-//        mouthServo.write(mouthClosed);
-//        break;
-//      default:
-//        break;
-//    }
-//  }
 
   delay(1);
 }
